@@ -1,0 +1,19 @@
+# usage:
+# $ docker-compose up
+# or
+# $ docker-compose run -e MNEMONIC_CMD=<mnemonic_cmd> tofnd
+
+volumes:
+  tofnd:
+
+services:
+  tofnd:
+    build: .
+    container_name: tofnd
+    hostname: tofnd
+    image: axelar/tofnd
+    volumes:
+      - tofnd:/.tofnd
+    environment:
+      # available cmds: auto, create, existing (default), import, export
+      - MNEMONIC_CMD=auto
