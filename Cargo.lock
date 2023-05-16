@@ -83,6 +83,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "arrayref"
+version = "0.3.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6b4930d2cb77ce62f89ee5d5289b4ac049559b1c45539271f5ed4fdc7db34545"
+
+[[package]]
 name = "async-channel"
 version = "1.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2061,6 +2067,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "serde_bytes"
+version = "0.11.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "416bda436f9aab92e02c8e10d49a15ddd339cea90b6e340fe51ed97abb548294"
+dependencies = [
+ "serde",
+]
+
+[[package]]
 name = "serde_derive"
 version = "1.0.159"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2392,6 +2407,7 @@ version = "0.1.0"
 dependencies = [
  "aes",
  "ark-serialize",
+ "arrayref",
  "bincode",
  "bls12_381",
  "ecdsa",
@@ -2402,6 +2418,7 @@ dependencies = [
  "rand 0.8.4",
  "rand_chacha 0.3.1",
  "serde",
+ "serde_bytes",
  "serde_json",
  "sha2",
  "sha3",

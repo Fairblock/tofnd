@@ -32,7 +32,7 @@ where
 {
     // set up counters for logging
     let total_num_of_shares = party_share_counts.iter().fold(0, |acc, s| acc + *s);
-    let total_round_p2p_msgs = total_num_of_shares * (total_num_of_shares - 1); // total number of messages is n(n-1)
+    let mut total_round_p2p_msgs = total_num_of_shares * (total_num_of_shares - 1); // total number of messages is n(n-1)
 
     let mut round_count = 0;
     while let Protocol::NotDone(mut round) = party {
@@ -40,7 +40,7 @@ where
 
         // handle outgoing traffic
         handle_outgoing(&chans.sender, &round, party_uids, round_count, span.clone())?;
-
+debug!("round {} : p2ps = {} bcasts = {}", round_count, total_round_p2p_msgs,total_num_of_shares);
         // collect incoming traffic
         handle_incoming(
             &mut chans.receiver,
@@ -74,7 +74,7 @@ fn handle_outgoing<F, K, P, const MAX_MSG_IN_LEN: usize>(
 ) -> TofndResult<()> {
     let send_span = span!(parent: &span, Level::DEBUG, "outgoing", round = round_count);
     let _start = send_span.enter();
-    debug!("begin");
+   
     // send outgoing bcasts
     if let Some(bcast) = round.bcast_out() {
         debug!("generating out bcast");
@@ -107,7 +107,7 @@ fn handle_outgoing<F, K, P, const MAX_MSG_IN_LEN: usize>(
             )))?
         }
     }
-    debug!("finished");
+    
     Ok(())
 }
 
@@ -125,6 +125,7 @@ async fn handle_incoming<F, K, P, const MAX_MSG_IN_LEN: usize>(
 
     // loop until no more messages are needed for this round
     while round.expecting_more_msgs_this_round() {
+        
         // get internal message from broadcaster
         let traffic = receiver.recv().await.ok_or(format!(
             "{}: stream closed by client before protocol has completed",
@@ -158,17 +159,17 @@ async fn handle_incoming<F, K, P, const MAX_MSG_IN_LEN: usize>(
         if traffic.is_broadcast {
             bcast_msg_count += 1;
             debug!(
-                "got incoming bcast message {}/{}",
+                "{} got incoming bcast message {}/{}",round.info().party_id().to_string(),
                 bcast_msg_count, total_num_of_shares
             );
         } else {
             p2p_msg_count += 1;
             debug!(
-                "got incoming p2p message {}/{}",
+                "{} got incoming p2p message {}/{}",round.info().party_id().to_string(),
                 p2p_msg_count, total_round_p2p_msgs
             );
         }
-        debug!("my check: {}", &traffic.from_party_uid);
+     
         // get sender's party index
         let from = party_uids
             .iter()
@@ -182,6 +183,7 @@ async fn handle_incoming<F, K, P, const MAX_MSG_IN_LEN: usize>(
         {
             return Err(anyhow!("error calling tofn::msg_in with [from: {}]", from));
         };
+      
     }
 
     Ok(())
