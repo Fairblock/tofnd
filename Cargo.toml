@@ -10,16 +10,16 @@ tonic = "0.6"
 #tofn = { git = "https://github.com/axelarnetwork/tofn", branch = "main"}
 tofn = { path = "/home/setareh/job/ibe libs/tofn" }
 sled = {version = "0.34", default-features = false}
-
+group = "0.13.0"
 # logging
 log = {version = "0.4",default-features = false }
 tracing = {version = "0.1", default-features = false}
 tracing-subscriber= {version = "0.3", features = ["json", "env-filter"]}
 atty = {version = "0.2", default-features = false}
-
+bls12_381 = {version ="0.8.0"}
 # config
 clap = {version = "3.0", default-features = false, features = ["std", "cargo", "env"]}
-
+serde_json = "1.0"
 # sled dependency
 serde = { version = "1.0.159", features = ["derive"], default-features = false }
 # sled encryption

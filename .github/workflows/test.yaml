@@ -1,0 +1,32 @@
+name: Testing
+
+on:
+  - pull_request
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        os:
+          # - ubuntu-18.04          
+          - macos-latest
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout code and submodule
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - uses: webfactory/ssh-agent@v0.5.1
+        with:
+            ssh-private-key: ${{ secrets.CICD_RSA_KEY }}
+
+      - name: Install stable toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
+      - name: Run cargo test
+        run: cargo test --release --all-features

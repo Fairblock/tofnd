@@ -24,6 +24,9 @@ impl proto::MessageOut {
     pub(super) fn new_bcast(bcast: &[u8]) -> Self {
         Self::new_traffic("", bcast, true)
     }
+    pub(super) fn new_bcast_r3(bcast: &[u8]) -> Self {
+        Self::new_traffic("r3", bcast, true)
+    }
     pub(super) fn new_p2p(receiver_id: &str, p2p: &[u8]) -> Self {
         Self::new_traffic(receiver_id, p2p, false)
     }
