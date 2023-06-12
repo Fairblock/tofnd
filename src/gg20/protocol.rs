@@ -115,7 +115,7 @@ where
         handle_outgoing(&chans.sender, &round, party_uids, round_count, span.clone())?;
 //debug!("round {} : p2ps = {} bcasts = {}", round_count, total_round_p2p_msgs,total_num_of_shares);
         // collect incoming traffic
-        debug!("outgoing sent: {}", round_count);
+       // debug!("outgoing sent: {}", round_count);
         handle_incoming(
             &mut chans.receiver,
             &mut round,
@@ -126,7 +126,7 @@ where
             span.clone(),
         )
         .await?;
-debug!("here: {}", round_count);
+//debug!("here: {}", round_count);
         // check if everything was ok this round
         party = round
             .execute_next_round()
@@ -151,7 +151,7 @@ fn handle_outgoing<F, K, P, const MAX_MSG_IN_LEN: usize>(
    
     // send outgoing bcasts
     if let Some(bcast) = round.bcast_out() {
-        debug!("generating out bcast");
+       // debug!("generating out bcast");
         // send message to gRPC client
      //   let string = String::from_utf8(*bcast).unwrap();
      if round.info().round() == 2{
@@ -224,15 +224,20 @@ async fn handle_incoming<F, K, P, const MAX_MSG_IN_LEN: usize>(
         
         i = i+ 1;
         // get internal message from broadcaster
-        let timeout_duration = Duration::from_secs(60); // Timeout duration of 2 minutes
+        // let timeout_duration = Duration::from_secs(15); // Timeout duration of 2 minutes
 
-        let traffic = timeout(timeout_duration, receiver.recv()).await.map_err(|_| {
-            format!(
-                "{}: stream closed by client or timed out before protocol has completed",
-                round_count
-            )
-        });
-        debug!("now {}",i);
+        // let traffic = timeout(timeout_duration, receiver.recv()).await.map_err(|_| {
+        //     format!(
+        //         "{}: stream closed by client or timed out before protocol has completed",
+        //         round_count
+        //     )
+        // });
+        let traffic = receiver.recv().await.ok_or(format!(
+            "{}: stream closed by client before protocol has completed",
+            round_count
+        ));
+      
+       // debug!("now {}",i);
         // unpeel TrafficIn
         let traffic = match traffic.clone() {
             Ok(traffic_opt) => match traffic_opt {
@@ -249,7 +254,11 @@ async fn handle_incoming<F, K, P, const MAX_MSG_IN_LEN: usize>(
                 break;
             }
         };
-        debug!("then {}",i);
+        if traffic.clone().payload == "timeout".as_bytes().to_vec(){
+            continue_loop = false;
+            break;
+        }
+       // debug!("then {}",i);
         // We have to spawn a new span it in each loop because `async` calls don't work well with tracing
         // See details on how we need to make spans curve around `.await`s here:
         // https://docs.rs/tracing/0.1.25/tracing/span/index.html#entering-a-span
@@ -257,7 +266,7 @@ async fn handle_incoming<F, K, P, const MAX_MSG_IN_LEN: usize>(
         let _start = recv_span.enter();
 
         // log incoming message
-        if traffic.clone().unwrap().is_broadcast {
+        if traffic.clone().is_broadcast {
             bcast_msg_count += 1;
             debug!(
                 "{} got incoming bcast message {}/{}",round.info().party_id().to_string(),
@@ -270,20 +279,30 @@ async fn handle_incoming<F, K, P, const MAX_MSG_IN_LEN: usize>(
                 p2p_msg_count, total_round_p2p_msgs
             );
         }
-     debug!("{:?}", &traffic);
-        // get sender's party index
+   
+      //  debug!("traffic: {:?}", traffic.clone());
+        // get sender's party index 
         let from = party_uids
             .iter()
-            .position(|uid| uid == &traffic.clone().unwrap().from_party_uid)
+            .position(|uid| uid == &traffic.clone().from_party_uid)
             .ok_or_else(|| anyhow!("from uid does not exist in party uids"))?;
 
         // try to set a message
-        if round
-            .msg_in(TypedUsize::from_usize(from), &traffic.unwrap().payload)
+        if round_count == 3{
+            if round
+            .msg_inr4(TypedUsize::from_usize(from), &traffic.clone().payload)
             .is_err()
         {
             return Err(anyhow!("error calling tofn::msg_in with [from: {}]", from));
         };
+        }
+        if round_count != 3{
+        if round
+            .msg_in(TypedUsize::from_usize(from), &traffic.payload)
+            .is_err()
+        {
+            return Err(anyhow!("error calling tofn::msg_in with [from: {}]", from));
+        };}
         continue_loop = round.expecting_more_msgs_this_round(); 
         
     

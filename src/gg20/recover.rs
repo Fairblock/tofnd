@@ -111,7 +111,7 @@ impl Gg20Service {
     //     // try to recover keypairs
     //     let session_nonce = init.new_key_uid.as_bytes();
     //     let party_keypair = match self.cfg.safe_keygen {
-    //         true => recover_party_keypair(party_id, secret_recovery_key, session_nonce),
+    //         true => recover_party_keypair_unsafe(party_id, secret_recovery_key, session_nonce),
     //         false => recover_party_keypair_unsafe(party_id, secret_recovery_key, session_nonce),
     //     }
     //     .map_err(|_| anyhow!("party keypair recovery failed"))?;
@@ -125,8 +125,8 @@ impl Gg20Service {
     //         .map(|(i, share_recovery_info_bytes)| {
     //             SecretKeyShare::recover(
     //                 &party_keypair,
-    //                 share_recovery_info_bytes, // request recovery for ith share
-    //                 &output.group_recover_info,
+    //               //  share_recovery_info_bytes, // request recovery for ith share
+    //                 &output.private_recover_info,
     //                 &output.pub_key,
     //                 party_id,
     //                 i,
@@ -140,31 +140,31 @@ impl Gg20Service {
     //     Ok(secret_key_shares)
     // }
 
-    // /// attempt to write recovered secret key shares to the kv-store
-    // async fn update_share_kv_store(
-    //     &self,
-    //     keygen_init_sanitized: KeygenInitSanitized,
-    //     secret_key_shares: Vec<SecretKeyShare>,
-    // ) -> TofndResult<()> {
-    //     // try to make a reservation
-    //     let reservation = self
-    //         .kv_manager
-    //         .kv()
-    //         .reserve_key(keygen_init_sanitized.new_key_uid)
-    //         .await
-    //         .map_err(|err| anyhow!("failed to complete reservation: {}", err))?;
-    //     // acquire kv-data
-    //     let kv_data = PartyInfo::get_party_info(
-    //         secret_key_shares,
-    //         keygen_init_sanitized.party_uids,
-    //         keygen_init_sanitized.party_share_counts,
-    //         keygen_init_sanitized.my_index,
-    //     );
-    //     // try writing the data to the kv-store
-    //     self.kv_manager
-    //         .kv()
-    //         .put(reservation, kv_data.try_into()?)
-    //         .await
-    //         .map_err(|err| anyhow!("failed to update kv store: {}", err))
-    // }
+    /// attempt to write recovered secret key shares to the kv-store
+    async fn update_share_kv_store(
+        &self,
+        keygen_init_sanitized: KeygenInitSanitized,
+        secret_key_shares: Vec<SecretKeyShare>,
+    ) -> TofndResult<()> {
+        // try to make a reservation
+        let reservation = self
+            .kv_manager
+            .kv()
+            .reserve_key(keygen_init_sanitized.new_key_uid)
+            .await
+            .map_err(|err| anyhow!("failed to complete reservation: {}", err))?;
+        // acquire kv-data
+        let kv_data = PartyInfo::get_party_info(
+            secret_key_shares,
+            keygen_init_sanitized.party_uids,
+            keygen_init_sanitized.party_share_counts,
+            keygen_init_sanitized.my_index,
+        );
+        // try writing the data to the kv-store
+        self.kv_manager
+            .kv()
+            .put(reservation, kv_data.try_into()?)
+            .await
+            .map_err(|err| anyhow!("failed to update kv store: {}", err))
+    }
 }

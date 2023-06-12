@@ -16,25 +16,25 @@ service GG20 {
     rpc KeyPresence(KeyPresenceRequest) returns (KeyPresenceResponse);
 }
 
-// message RecoverRequest {
-//     KeygenInit keygen_init = 1;
-//     KeygenOutput keygen_output = 2;
-// }
+message RecoverRequest {
+    KeygenInit keygen_init = 1;
+    KeygenOutput keygen_output = 2;
+}
 
-// message RecoverResponse { 
-//     enum Response {
-//         RESPONSE_UNSPECIFIED = 0;
-//         RESPONSE_SUCCESS = 1;
-//         RESPONSE_FAIL = 2;
-//     }
-//     Response response = 1; 
-// }
+message RecoverResponse { 
+    enum Response {
+        RESPONSE_UNSPECIFIED = 0;
+        RESPONSE_SUCCESS = 1;
+        RESPONSE_FAIL = 2;
+    }
+    Response response = 1; 
+}
 
 // Keygen's success response
 message KeygenOutput {
     bytes pub_key = 1;               // pub_key; common for all parties
     // bytes group_recover_info = 2;    // recovery info common for all parties
-    // bytes private_recover_info = 3;  // recovery info unique for each party
+     bytes private_recover_info = 2;  // recovery info unique for each party
 }
 
 // generic message types shared by Keygen, Sign

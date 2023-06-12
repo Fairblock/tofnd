@@ -56,8 +56,8 @@ impl Gg20Service {
             Self::process_keygen_outputs(&keygen_init, keygen_outputs, stream_out_sender)?;
 
         // try to retrieve private recovery info from all shares
-        // let private_recover_info =
-        //     Self::get_private_recovery_data(&secret_key_shares).map_err(|err| anyhow!(err))?;
+        let private_recover_info =
+            Self::get_private_recovery_data(&secret_key_shares).map_err(|err| anyhow!(err))?;
 
         // combine responses from all keygen threads to a single struct
         let kv_data = PartyInfo::get_party_info(
@@ -81,7 +81,7 @@ impl Gg20Service {
                 Ok(proto::KeygenOutput {
                     pub_key,
                     
-                    // private_recover_info,
+                     private_recover_info,
                 }),
             )))?,
         )
@@ -165,24 +165,24 @@ impl Gg20Service {
     }
 
     /// Create private recovery info out of a vec with all parties' SecretKeyShares
-    // fn get_private_recovery_data(secret_key_shares: &[SecretKeyShare]) -> TofndResult<BytesVec> {
-    //     // try to retrieve private recovery info from all party's shares
-    //     let private_infos = secret_key_shares
-    //         .iter()
-    //         .enumerate()
-    //         .map(|(index, secret_key_share)| {
-    //             secret_key_share
-    //                 .recovery_info()
-    //                 .map_err(|_| anyhow!("Unable to get recovery info for share {}", index))
-    //         })
-    //         .collect::<TofndResult<Vec<_>>>()?;
+    fn get_private_recovery_data(secret_key_shares: &[SecretKeyShare]) -> TofndResult<BytesVec> {
+        // try to retrieve private recovery info from all party's shares
+        let private_infos = secret_key_shares
+            .iter()
+            .enumerate()
+            .map(|(index, secret_key_share)| {
+                secret_key_share
+                    .recovery_info()
+                    .map_err(|_| anyhow!("Unable to get recovery info for share {}", index))
+            })
+            .collect::<TofndResult<Vec<_>>>()?;
 
-    //     // We use an additional layer of serialization to simplify the protobuf definition
-    //     let private_bytes = serialize(&private_infos)
-    //         .map_err(|_| anyhow!("Failed to serialize private recovery infos"))?;
+        // We use an additional layer of serialization to simplify the protobuf definition
+        let private_bytes = serialize(&private_infos)
+            .map_err(|_| anyhow!("Failed to serialize private recovery infos"))?;
 
-    //     Ok(private_bytes)
-    // }
+        Ok(private_bytes)
+    }
 
     /// wait all keygen threads and get keygen outputs
     async fn aggregate_keygen_outputs(

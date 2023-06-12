@@ -62,6 +62,7 @@ pub struct Context {
     pub(super) tofnd_index: TypedUsize<KeygenPartyId>, // tofnd index of party
     // pub(super) tofnd_subindex: usize,    // index of party's share
     pub(super) party_keygen_data: PartyKeygenData,
+    
 }
 
 impl Context {
