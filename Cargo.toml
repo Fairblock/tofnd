@@ -8,7 +8,7 @@ license = "MIT OR Apache-2.0"
 [dependencies]
 tonic = "0.6"
 #tofn = { git = "https://github.com/axelarnetwork/tofn", branch = "main"}
-tofn = { path = "/home/setareh/job/ibe libs/tofn" }
+tofn = { path = "./tofn" }
 sled = {version = "0.34", default-features = false}
 group = "0.13.0"
 # logging

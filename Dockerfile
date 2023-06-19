@@ -10,7 +10,7 @@ WORKDIR /tofnd
 
 COPY ./Cargo.toml .
 COPY ./Cargo.lock .
-
+COPY tofn ./tofn
 # build dependencies separately
 RUN mkdir src && echo 'fn main() {}' > src/main.rs
 RUN --mount=type=ssh cargo build --release
@@ -30,7 +30,7 @@ RUN echo "installing with features: ["$features"]"
 RUN --mount=type=ssh if [ "$features" = "default" ]; then \
   cargo install --locked --path .; \
   else \
-  cargo install --locked --features ${features} --path .; \
+  cargo install --locked --features -a 0.0.0.0 ${features} --path .; \
   fi
 
 FROM debian:bullseye-slim as runner
