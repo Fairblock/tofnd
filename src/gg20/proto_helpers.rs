@@ -21,21 +21,22 @@ use proto::message_out::CriminalList as ProtoCriminalList;
 
 // convenience constructors
 impl proto::MessageOut {
-    pub(super) fn new_bcast(bcast: &[u8]) -> Self {
-        Self::new_traffic("", bcast, true)
+    pub(super) fn new_bcast(bcast: &[u8], round_num : &str) -> Self {
+        Self::new_traffic("", bcast, true, round_num)
     }
-    pub(super) fn new_bcast_r3(bcast: &[u8]) -> Self {
-        Self::new_traffic("r3", bcast, true)
+    pub(super) fn new_bcast_r3(bcast: &[u8], round_num : &str) -> Self {
+        Self::new_traffic("r3", bcast, true, round_num)
     }
-    pub(super) fn new_p2p(receiver_id: &str, p2p: &[u8]) -> Self {
-        Self::new_traffic(receiver_id, p2p, false)
+    pub(super) fn new_p2p(receiver_id: &str, p2p: &[u8], round_num : &str) -> Self {
+        Self::new_traffic(receiver_id, p2p, false, round_num)
     }
-    pub(super) fn new_traffic(receiver_id: &str, msg: &[u8], is_broadcast: bool) -> Self {
+    pub(super) fn new_traffic(receiver_id: &str, msg: &[u8], is_broadcast: bool, round_num : &str) -> Self {
         proto::MessageOut {
             data: Some(proto::message_out::Data::Traffic(proto::TrafficOut {
                 to_party_uid: receiver_id.to_string(),
                 payload: msg.to_vec(),
                 is_broadcast,
+                round_num: round_num.to_string()
             })),
         }
     }

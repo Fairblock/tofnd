@@ -8,6 +8,7 @@ use tofn::{
     sdk::api::{Protocol, ProtocolOutput, Round},
 };
 use serde_json;
+use tracing_subscriber::field::debug;
 // tonic cruft
 use super::{proto, ProtocolCommunication};
 use tokio::{sync::mpsc::{UnboundedReceiver, UnboundedSender}, time::timeout};
@@ -155,9 +156,9 @@ fn handle_outgoing<F, K, P, const MAX_MSG_IN_LEN: usize>(
         // send message to gRPC client
      //   let string = String::from_utf8(*bcast).unwrap();
      if round.info().round() == 2{
-        sender.send(Ok(proto::MessageOut::new_bcast_r3(bcast)))?
+        sender.send(Ok(proto::MessageOut::new_bcast_r3(bcast, &round.info().round().to_string())))?
      }else{
-        sender.send(Ok(proto::MessageOut::new_bcast(bcast)))?
+        sender.send(Ok(proto::MessageOut::new_bcast(bcast,&round.info().round().to_string())))?
      }
         
     }
@@ -174,12 +175,12 @@ fn handle_outgoing<F, K, P, const MAX_MSG_IN_LEN: usize>(
                 .share_to_party_id(i)
                 .map_err(|_| anyhow!("Unable to get tofnd index for party {}", i))?;
 
-            debug!(
-                "out p2p to [{}] ({}/{})",
-                party_uids[tofnd_idx.as_usize()],
-                p2p_msg_count,
-                p2ps_out.len() - 1
-            );
+            // debug!(
+            //     "out p2p to [{}] ({}/{})",
+            //     party_uids[tofnd_idx.as_usize()],
+            //     p2p_msg_count,
+            //     p2ps_out.len() - 1
+            // );
             p2p_msg_count += 1;
 //debug!("round number is {}",round.info().round());
 //    if round.info().round() == 2{
@@ -197,7 +198,7 @@ fn handle_outgoing<F, K, P, const MAX_MSG_IN_LEN: usize>(
             // send message to gRPC client
             sender.send(Ok(proto::MessageOut::new_p2p(
                 &party_uids[tofnd_idx.as_usize()],
-                p2p,
+                p2p,&round.info().round().to_string()
             )))?
         }
     }
@@ -254,10 +255,22 @@ async fn handle_incoming<F, K, P, const MAX_MSG_IN_LEN: usize>(
                 break;
             }
         };
-        if traffic.clone().payload == "timeout".as_bytes().to_vec(){
-            continue_loop = false;
-            break;
+       
+        if traffic.clone().payload[0..=6] == "timeout".as_bytes().to_vec(){
+         //   debug!("{:?}",round_count);
+        if traffic.clone().payload == *("timeout".to_owned()+&round_count.to_string()).as_bytes().to_vec(){
+            
+         
+                continue_loop = false;
+                break;
+            
+            // continue_loop = round.expecting_more_msgs_this_round(); 
+           
         }
+        continue_loop = round.expecting_more_msgs_this_round(); 
+    }
+        else{
+        
        // debug!("then {}",i);
         // We have to spawn a new span it in each loop because `async` calls don't work well with tracing
         // See details on how we need to make spans curve around `.await`s here:
@@ -268,16 +281,16 @@ async fn handle_incoming<F, K, P, const MAX_MSG_IN_LEN: usize>(
         // log incoming message
         if traffic.clone().is_broadcast {
             bcast_msg_count += 1;
-            debug!(
-                "{} got incoming bcast message {}/{}",round.info().party_id().to_string(),
-                bcast_msg_count, total_num_of_shares
-            );
+            // debug!(
+            //     "{} got incoming bcast message {}/{}",round.info().party_id().to_string(),
+            //     bcast_msg_count, total_num_of_shares
+            // );
         } else {
             p2p_msg_count += 1;
-            debug!(
-                "{} got incoming p2p message {}/{}",round.info().party_id().to_string(),
-                p2p_msg_count, total_round_p2p_msgs
-            );
+            // debug!(
+            //     "{} got incoming p2p message {}/{}",round.info().party_id().to_string(),
+            //     p2p_msg_count, total_round_p2p_msgs
+            // );
         }
    
       //  debug!("traffic: {:?}", traffic.clone());
@@ -307,7 +320,7 @@ async fn handle_incoming<F, K, P, const MAX_MSG_IN_LEN: usize>(
         
     
 
-    }
+    }}
 
     Ok(())
 }
