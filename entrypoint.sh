@@ -113,9 +113,10 @@ if [ -n "${MNEMONIC_CMD}" ]; then \
     esac
 
     echo "Using existing mnemonic ..."
+    
     ARGS+=" -m existing"
 fi
 
 # execute tofnd daemon
-exec echo ${PASSWORD} | tofnd ${ARGS} "$@"; \
 
+exec echo ${PASSWORD} | tofnd ${ARGS} -a 0.0.0.0 "$@"; \

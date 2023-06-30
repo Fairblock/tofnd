@@ -257,10 +257,10 @@ async fn handle_incoming<F, K, P, const MAX_MSG_IN_LEN: usize>(
         };
        
         if traffic.clone().payload[0..=6] == "timeout".as_bytes().to_vec(){
-         //   debug!("{:?}",round_count);
+           
         if traffic.clone().payload == *("timeout".to_owned()+&round_count.to_string()).as_bytes().to_vec(){
             
-         
+            debug!("timeout {:?}",round_count);
                 continue_loop = false;
                 break;
             
@@ -281,16 +281,16 @@ async fn handle_incoming<F, K, P, const MAX_MSG_IN_LEN: usize>(
         // log incoming message
         if traffic.clone().is_broadcast {
             bcast_msg_count += 1;
-            // debug!(
-            //     "{} got incoming bcast message {}/{}",round.info().party_id().to_string(),
-            //     bcast_msg_count, total_num_of_shares
-            // );
+            debug!(
+                "{} got incoming bcast message {}/{}",round.info().party_id().to_string(),
+                bcast_msg_count, total_num_of_shares
+            );
         } else {
             p2p_msg_count += 1;
-            // debug!(
-            //     "{} got incoming p2p message {}/{}",round.info().party_id().to_string(),
-            //     p2p_msg_count, total_round_p2p_msgs
-            // );
+            debug!(
+                "{} got incoming p2p message {}/{}",round.info().party_id().to_string(),
+                p2p_msg_count, total_round_p2p_msgs
+            );
         }
    
       //  debug!("traffic: {:?}", traffic.clone());

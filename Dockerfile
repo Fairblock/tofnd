@@ -7,13 +7,14 @@ RUN set -ex \
   && apt-get install -qq --no-install-recommends ca-certificates openssh-client git make
 
 WORKDIR /tofnd
-
+COPY tofn ./tofn
 COPY ./Cargo.toml .
 COPY ./Cargo.lock .
-COPY tofn ./tofn
+
 # build dependencies separately
 RUN mkdir src && echo 'fn main() {}' > src/main.rs
-RUN --mount=type=ssh cargo build --release
+RUN cargo build --release
+
 
 COPY src ./src
 COPY proto ./proto
@@ -23,14 +24,14 @@ RUN rustup component add rustfmt
 
 # read features argument. Use "default" because [ -z "$features" ] doesn't work
 ARG features="default"
-RUN echo "installing with features: ["$features"]"
+RUN echo "installing with features: ["$features"]" 
 
 # install tofnd
 # use --locked for CI builds: https://doc.rust-lang.org/cargo/commands/cargo-install.html#manifest-options
-RUN --mount=type=ssh if [ "$features" = "default" ]; then \
+RUN if [ "$features" = "default" ]; then \
   cargo install --locked --path .; \
   else \
-  cargo install --locked --features -a 0.0.0.0 ${features} --path .; \
+  cargo install --locked --features -p 50058 ${features} --path .; \
   fi
 
 FROM debian:bullseye-slim as runner
