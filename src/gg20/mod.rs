@@ -28,32 +28,6 @@ use types::*;
 #[tonic::async_trait]
 impl proto::gg20_server::Gg20 for service::Gg20Service {
     type KeygenStream = UnboundedReceiverStream<Result<proto::MessageOut, tonic::Status>>;
-    //type SignStream = Self::KeygenStream;
-
-    /// Recover unary gRPC. See [recover].
-    // async fn recover(
-    //     &self,
-    //     request: tonic::Request<proto::RecoverRequest>,
-    // ) -> Result<Response<proto::RecoverResponse>, Status> {
-    //     let request = request.into_inner();
-
-    //     let response = self.handle_recover(request).await;
-    //     let response = match response {
-    //         Ok(()) => {
-    //             info!("Recovery completed successfully!");
-    //             proto::recover_response::Response::Success
-    //         }
-    //         Err(err) => {
-    //             error!("Unable to complete recovery: {}", err);
-    //             proto::recover_response::Response::Fail
-    //         }
-    //     };
-
-    //     Ok(Response::new(proto::RecoverResponse {
-    //         // the prost way to convert enums to i32 https://github.com/danburkert/prost#enumerations
-    //         response: response as i32,
-    //     }))
-    // }
 
     // /// KeyPresence unary gRPC. See [key_presence].
     async fn key_presence(
@@ -84,16 +58,16 @@ impl proto::gg20_server::Gg20 for service::Gg20Service {
         request: Request<tonic::Streaming<proto::MessageIn>>,
     ) -> Result<Response<Self::KeygenStream>, Status> {
         info!("Key gen called succesfully!");
-       
+
         let stream_in = request.into_inner();
         let (msg_sender, rx) = mpsc::unbounded_channel();
-       
+
         // log span for keygen
         let span = span!(Level::INFO, "Keygen");
         let _enter = span.enter();
         let s = span.clone();
         let gg20 = self.clone();
-       
+
         tokio::spawn(async move {
             // can't return an error from a spawned thread
             if let Err(e) = gg20.handle_keygen(stream_in, msg_sender.clone(), s).await {
@@ -104,37 +78,7 @@ impl proto::gg20_server::Gg20 for service::Gg20Service {
                 }
             }
         });
-      
-          
-            
-        
+
         Ok(Response::new(UnboundedReceiverStream::new(rx)))
     }
-
-   
-    // async fn sign(
-    //     &self,
-    //     request: Request<tonic::Streaming<proto::MessageIn>>,
-    // ) -> Result<Response<Self::SignStream>, Status> {
-    //     let stream = request.into_inner();
-    //     let (msg_sender, rx) = mpsc::unbounded_channel();
-
-    //     // log span for sign
-    //     let span = span!(Level::INFO, "Sign");
-    //     let _enter = span.enter();
-    //     let s = span.clone();
-    //     let gg20 = self.clone();
-
-    //     tokio::spawn(async move {
-    //         // can't return an error from a spawned thread
-    //         if let Err(e) = gg20.handle_sign(stream, msg_sender.clone(), s).await {
-    //             error!("sign failure: {:?}", e.to_string());
-    //             // we can't handle errors in tokio threads. Log error if we are unable to send the status code to client.
-    //             if let Err(e) = msg_sender.send(Err(Status::invalid_argument(e.to_string()))) {
-    //                 error!("could not send error to client: {}", e.to_string());
-    //             }
-    //         }
-    //     });
-    //     Ok(Response::new(UnboundedReceiverStream::new(rx)))
-    }
-
+}

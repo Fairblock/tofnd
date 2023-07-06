@@ -62,7 +62,6 @@ pub struct Context {
     pub(super) tofnd_index: TypedUsize<KeygenPartyId>, // tofnd index of party
     // pub(super) tofnd_subindex: usize,    // index of party's share
     pub(super) party_keygen_data: PartyKeygenData,
-    
 }
 
 impl Context {
@@ -92,15 +91,4 @@ impl Context {
             Err(_) => Err(anyhow!("failed to create party_share_counts")),
         }
     }
-
-  //  /// export state; used for logging
-    // pub fn log_info(&self) -> String {
-    //     format!(
-    //         "[{}] [uid:{}, share:{}/{}]",
-    //         self.key_id,
-    //         self.uids[self.tofnd_index.as_usize()],
-    //         self.tofnd_subindex + 1,
-    //         self.share_counts[self.tofnd_index.as_usize()]
-    //     )
-    // }
 }

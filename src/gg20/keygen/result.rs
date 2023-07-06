@@ -80,8 +80,8 @@ impl Gg20Service {
                 &keygen_init.party_uids,
                 Ok(proto::KeygenOutput {
                     pub_key,
-                    
-                     private_recover_info,
+
+                    private_recover_info,
                 }),
             )))?,
         )
@@ -113,10 +113,6 @@ impl Gg20Service {
                 // check that all shares returned the same public key and group recover info
                 let share_id = secret_key_shares[0].share().index();
                 let pub_key = secret_key_shares[0].group().encoded_pubkey();
-                // let group_info = secret_key_shares[0]
-                //     .group()
-                //     .all_shares_bytes()
-                //     .map_err(|_| anyhow!("unable to call all_shares_bytes()"))?;
 
                 // sanity check: pubkey and group recovery info should be the same across all shares
                 // Here we check that the first share produced the same info as the i-th.
@@ -130,20 +126,6 @@ impl Gg20Service {
                             secret_key_share.share().index()
                         ));
                     }
-
-                    // try to get group recovery info of i-th share. Each share should produce the same group info
-                    // let curr_group_info = secret_key_share
-                    //     .group()
-                    //     .all_shares_bytes()
-                    //     .map_err(|_| anyhow!("unable to call all_shares_bytes()"))?;
-                    // if group_info != curr_group_info {
-                    //     return Err(anyhow!(
-                    //         "Party {}'s share {} and {} returned different group recovery info",
-                    //         keygen_init.my_index,
-                    //         share_id,
-                    //         secret_key_share.share().index()
-                    //     ));
-                    // }
                 }
 
                 Ok((pub_key, secret_key_shares))

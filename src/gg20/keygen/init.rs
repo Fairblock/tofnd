@@ -6,8 +6,8 @@
 use futures_util::StreamExt;
 
 // spans for logging
-use tracing::Span;
 use tracing::debug;
+use tracing::Span;
 // error handling
 use crate::TofndResult;
 use anyhow::anyhow;
@@ -29,7 +29,7 @@ impl Gg20Service {
         keygen_span: Span,
     ) -> TofndResult<(KeygenInitSanitized, KeyReservation)> {
         // try to receive message
-        
+
         let msg = stream
             .next()
             .await
@@ -52,7 +52,7 @@ impl Gg20Service {
                 ))
             }
         };
-       // debug!("msg data : {:?}",keygen_init);
+        
         // try to process incoming message
         let (keygen_init, key_reservation) = self.process_keygen_init(keygen_init).await?;
 
@@ -103,7 +103,7 @@ impl Gg20Service {
     ) -> TofndResult<KeygenInitSanitized> {
         // convert `u32`s to `usize`s
         use std::convert::TryFrom;
-        debug!("my index: -----------------> {:?}",args.my_party_index);
+       // debug!("my index: -----------------> {:?}", args.my_party_index);
         let my_index = usize::try_from(args.my_party_index)?;
         let threshold = usize::try_from(args.threshold)?;
         let mut party_share_counts = args

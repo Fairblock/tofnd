@@ -175,26 +175,9 @@ fn handle_outgoing<F, K, P, const MAX_MSG_IN_LEN: usize>(
                 .share_to_party_id(i)
                 .map_err(|_| anyhow!("Unable to get tofnd index for party {}", i))?;
 
-            // debug!(
-            //     "out p2p to [{}] ({}/{})",
-            //     party_uids[tofnd_idx.as_usize()],
-            //     p2p_msg_count,
-            //     p2ps_out.len() - 1
-            // );
+            
             p2p_msg_count += 1;
-//debug!("round number is {}",round.info().round());
-//    if round.info().round() == 2{
-//         let result: Result<P2pSad, serde_json::Error> =
-//         serde_json::from_slice(&p2p);
-// debug!("round 3");
-//     match result {
-//         Ok(deserialized) => {
-//             debug!("deserialized: {:?}", deserialized);
-//         }
-//         Err(err) => {
-//             debug!("Deserialization error: {}", err);
-//         }
-//     }}
+
             // send message to gRPC client
             sender.send(Ok(proto::MessageOut::new_p2p(
                 &party_uids[tofnd_idx.as_usize()],
@@ -224,15 +207,7 @@ async fn handle_incoming<F, K, P, const MAX_MSG_IN_LEN: usize>(
     while continue_loop {
         
         i = i+ 1;
-        // get internal message from broadcaster
-        // let timeout_duration = Duration::from_secs(15); // Timeout duration of 2 minutes
-
-        // let traffic = timeout(timeout_duration, receiver.recv()).await.map_err(|_| {
-        //     format!(
-        //         "{}: stream closed by client or timed out before protocol has completed",
-        //         round_count
-        //     )
-        // });
+        
         let traffic = receiver.recv().await.ok_or(format!(
             "{}: stream closed by client before protocol has completed",
             round_count
