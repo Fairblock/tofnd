@@ -113,7 +113,8 @@ pub fn parse_args() -> TofndResult<Config> {
                     .possible_values(&AVAILABLE_BEHAVIOURS)
                     .help("malicious behaviour"),
             )
-            .arg(Arg::new("victim").required(true).help("victim")),
+            .arg(Arg::new("victim").required(true).help("victim"))
+            .arg(Arg::new("faulty").required(false).help("faulty")),
     );
     #[cfg(feature = "malicious")]
     let behaviours = get_behaviour_matches(app.clone())?;

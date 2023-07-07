@@ -230,8 +230,13 @@ async fn handle_incoming<F, K, P, const MAX_MSG_IN_LEN: usize>(
                 break;
             }
         };
-       
-        if traffic.clone().payload[0..=6] == "timeout".as_bytes().to_vec(){
+        let mut timeout_msg =false;
+        if (traffic.clone().payload.len()) >= 7{
+            if traffic.clone().payload[0..=6] == "timeout".as_bytes().to_vec(){
+                timeout_msg = true;
+            }
+        }
+        if timeout_msg{
            
         if traffic.clone().payload == *("timeout".to_owned()+&round_count.to_string()).as_bytes().to_vec(){
             
