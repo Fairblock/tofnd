@@ -57,7 +57,7 @@ fn match_string_to_behaviour(behaviour: &str, victim: usize, faulty:usize) -> Ke
         "Honest" => Honest,
         "R2BadShare" => R2BadShare { victim, faulty },
         "R2BadEncryption" => R2BadEncryption { victim },
-        "R3FalseAccusation" => R3FalseAccusation { victim },
+        "R3FalseAccusation" => R3FalseAccusation { victim , faulty },
         _ => Honest,
     }
 }
