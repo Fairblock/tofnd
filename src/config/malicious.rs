@@ -24,20 +24,33 @@ pub fn get_behaviour_matches(app: App) -> TofndResult<Behaviours> {
 
     // Set a default behaviour
     let mut behaviour = "Honest";
-    let mut victim = 0;
-    let mut faulty = 1;
+    let mut victim = vec![0];
+    let mut faulty = vec![1];
     if let Some(matches) = matches.subcommand_matches("malicious") {
         behaviour = matches
             .value_of("behaviour")
             .ok_or_else(|| anyhow!("behaviour value"))?;
-        victim = matches
-            .value_of("victim")
-            .ok_or_else(|| anyhow!("victim value"))?
-            .parse::<usize>()?;
-        faulty = matches
-            .value_of("faulty")
-            .ok_or_else(|| anyhow!("faulty value"))?
-            .parse::<usize>()?;
+        let victim_str = matches
+        .value_of("victim")
+        .ok_or_else(|| anyhow!("victim value"))?;
+    
+    let victim: Result<Vec<usize>, _> = victim_str
+        .split(',')
+        .map(|s| s.parse::<usize>())
+        .collect();
+    
+    let victim: Vec<usize> = victim.unwrap();
+    let faulty_str = matches
+    .value_of("faulty")
+    .ok_or_else(|| anyhow!("faulty value"))?;
+
+let faulty: Result<Vec<usize>, _> = faulty_str
+    .split(',')
+    .map(|s| s.parse::<usize>())
+    .collect();
+
+let faulty: Vec<usize> = faulty.unwrap();
+
     }
 
     // TODO: parse keygen malicious types as well
@@ -46,10 +59,16 @@ pub fn get_behaviour_matches(app: App) -> TofndResult<Behaviours> {
     Ok(Behaviours { keygen })
 }
 
-fn match_string_to_behaviour(behaviour: &str, victim: usize, faulty:usize) -> KeygenBehaviour {
+fn match_string_to_behaviour(
+    behaviour: &str,
+    _victim: Vec<usize>,
+    _faulty: Vec<usize>,
+) -> KeygenBehaviour {
     use KeygenBehaviour::*;
-    let victim = TypedUsize::from_usize(victim);
-    let faulty = TypedUsize::from_usize(faulty);
+    // let victim = TypedUsize::from_usize(victim);
+    let victim= _victim.iter().map(|&x| TypedUsize::from_usize(x)).collect();
+    let faulty= _faulty.iter().map(|&x| TypedUsize::from_usize(x)).collect();
+    // let faulty = TypedUsize::from_usize(faulty);
     // TODO: some of the behaviours do not demand a victim. In the future, more
     // will be added that potentially need different set of arguments.
     // Adjust this as needed to support that.
@@ -57,7 +76,7 @@ fn match_string_to_behaviour(behaviour: &str, victim: usize, faulty:usize) -> Ke
         "Honest" => Honest,
         "R2BadShare" => R2BadShare { victim, faulty },
         "R2BadEncryption" => R2BadEncryption { victim },
-        "R3FalseAccusation" => R3FalseAccusation { victim , faulty },
+        "R3FalseAccusation" => R3FalseAccusation { victim, faulty },
         _ => Honest,
     }
 }
