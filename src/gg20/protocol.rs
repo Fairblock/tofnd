@@ -111,12 +111,10 @@ where
     let mut round_count = 0;
     while let Protocol::NotDone(mut round) = party {
         round_count += 1;
-        debug!("here: {}", round_count);
+       
         // handle outgoing traffic
         handle_outgoing(&chans.sender, &round, party_uids, round_count, span.clone())?;
-//debug!("round {} : p2ps = {} bcasts = {}", round_count, total_round_p2p_msgs,total_num_of_shares);
-        // collect incoming traffic
-       // debug!("outgoing sent: {}", round_count);
+
         handle_incoming(
             &mut chans.receiver,
             &mut round,
@@ -127,7 +125,7 @@ where
             span.clone(),
         )
         .await?;
-//debug!("here: {}", round_count);
+
         // check if everything was ok this round
         party = round
             .execute_next_round()
@@ -152,9 +150,7 @@ fn handle_outgoing<F, K, P, const MAX_MSG_IN_LEN: usize>(
    
     // send outgoing bcasts
     if let Some(bcast) = round.bcast_out() {
-       // debug!("generating out bcast");
-        // send message to gRPC client
-     //   let string = String::from_utf8(*bcast).unwrap();
+     
      if round.info().round() == 2{
         sender.send(Ok(proto::MessageOut::new_bcast_r3(bcast, &round.info().round().to_string())))?
      }else{
