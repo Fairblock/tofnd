@@ -1,4 +1,4 @@
-# This is a modified version of [tofnd](https://github.com/axelarnetwork/tofnd.git)
+**This is a modified version of [tofnd](https://github.com/axelarnetwork/tofnd.git)**
 # Tofnd: A gRPC threshold signature scheme daemon
 
 Tofnd is a [gRPC](https://grpc.io/) server written in Rust that wraps the [tofn](https://github.com/axelarnetwork/tofn) threshold cryptography library.
